@@ -35,7 +35,12 @@ database.once("connected", () => {
 app.use(express.static("public"));
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors());
+app.use(
+    cors({
+        origin: true,
+        credentials: true,
+    })
+);
 
 app.use("/api/v1/user", userRouter);
 
