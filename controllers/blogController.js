@@ -24,7 +24,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 exports.uploadBlogImage = upload.single("image");
 
 exports.createNewBlog = catchAsync(async (req, res, next) => {
-    const { blogTitle, blogContent, blogAbstract } = req.body;
+    const { blogTitle, blogContent, blogAbstract, _id, email } = req.body;
     const user = req?.user;
     let file = req.file;
     const category = validateBlogCategory(req?.body?.category);
@@ -33,7 +33,7 @@ exports.createNewBlog = catchAsync(async (req, res, next) => {
         blogTitle,
         blogAbstract,
         blogContent,
-        author: user._id,
+        author: _id,
         category,
         createdOn: new Date(),
     });
@@ -61,7 +61,7 @@ exports.createNewBlog = catchAsync(async (req, res, next) => {
     console.log(apiGatewayURL);
 
     const sendEmail = await axios.post(`${apiGatewayURL}send-email`, {
-        to: user.email,
+        to: email,
         subject: `${blogTitle} - Blogiver`,
         message: `You have just created a new blog on Blogiver. \nBlog Title: ${blog.blogTitle}.\n Blog Abstract: ${blog.blogAbstract}. \nCategory: ${blog.category}`,
     });
@@ -94,9 +94,10 @@ exports.getAllBlogs = catchAsync(async (req, res, next) => {
 });
 
 exports.getAllBlogsByUser = catchAsync(async (req, res, next) => {
-    const user = req.user;
+    // const user = req.user;
+    const { id } = req.params;
 
-    const blogs = await Blog.find({ author: user._id });
+    const blogs = await Blog.find({ author: id });
 
     res.status(200).json({
         status: "success",
