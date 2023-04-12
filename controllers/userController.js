@@ -5,17 +5,22 @@ const jwt = require("jsonwebtoken");
 
 const cookie = require("../constants/cookies");
 const AppError = require("../utils/appError");
+const { getSecrets } = require("../utils/getAWSSecrets");
 
 exports.sendCookie = (key, value, options, res) => {
     if (!options.maxAge) {
-        options.maxAge = process.env.JWT_TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000;
+        getSecrets().then((secrets) => {
+            options.maxAge = secrets.JWT_TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000;
+        });
     }
     res.cookie(key, value, options);
 };
 
-exports.createAndSendToken = (data, res) => {
-    const token = jwt.sign(data, process.env.JWT_TOKEN_SECRET, {
-        expiresIn: process.env.JWT_TOKEN_EXPIRY,
+exports.createAndSendToken = async (data, res) => {
+    const secrets = await getSecrets();
+
+    const token = jwt.sign(data, secrets.JWT_TOKEN_SECRET, {
+        expiresIn: secrets.JWT_TOKEN_EXPIRY,
     });
 
     this.sendCookie(
@@ -42,7 +47,7 @@ exports.createNewAccount = catchAsync(async (req, res, next) => {
 
     user.password = undefined;
 
-    const token = this.createAndSendToken(
+    const token = await this.createAndSendToken(
         {
             email: user.email,
             _id: user._id,
@@ -70,7 +75,7 @@ exports.login = catchAsync(async (req, res, next) => {
         return next(new AppError("Incorrect email or password entered", 401));
     }
 
-    const token = this.createAndSendToken({ email, _id: user._id }, res);
+    const token = await this.createAndSendToken({ email, _id: user._id }, res);
 
     res.status(200).json({
         status: "success",
@@ -82,12 +87,11 @@ exports.login = catchAsync(async (req, res, next) => {
 exports.validateSession = catchAsync(async (req, res, next) => {
     const token = req.cookies?.jwt;
 
-    console.log(token);
+    const secrets = await getSecrets();
 
-    const tokenData = await promisify(jwt.verify)(token, process.env.JWT_TOKEN_SECRET);
+    const tokenData = await promisify(jwt.verify)(token, secrets.JWT_TOKEN_SECRET);
 
     const user = await User.findById(tokenData._id);
-    console.log(user);
 
     this.sendCookie(cookie.KEY, token, { httpOnly: true }, res);
 

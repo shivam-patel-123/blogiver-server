@@ -34,6 +34,11 @@ const sendErrorResponse = (err, req, res) => {
     });
 };
 
+const handleCastError = (err) => {
+    const message = `Invalid ${err.path}: ${err.value}.`;
+    return new AppError(message, 400);
+};
+
 module.exports = (err, req, res, next) => {
     err.statusCode = err.statusCode || 500;
     err.status = err.status || "error";
@@ -43,9 +48,10 @@ module.exports = (err, req, res, next) => {
     console.log(err);
 
     if (err.code == 11000) error = handleDuplicateFieldsDb(err);
-    if (err.name == "ValidationError") error = handleValidationError(err);
-    if (err.name == "TokenExpiredError") error = handleTokenExpiredError(err);
-    if (err.name == "JsonWebTokenError") error = handleInvalidTokenError(err);
+    if (err.name === "ValidationError") error = handleValidationError(err);
+    if (err.name === "TokenExpiredError") error = handleTokenExpiredError(err);
+    if (err.name === "JsonWebTokenError") error = handleInvalidTokenError(err);
+    if (err.name === "CastError") error = handleCastError(err);
 
     sendErrorResponse(error, req, res);
 };

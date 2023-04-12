@@ -5,7 +5,9 @@ const cookieParser = require("cookie-parser");
 require("dotenv").config();
 
 const userRouter = require("./routes/userRoutes");
+const blogRouter = require("./routes/blogRoutes");
 const globalErrorHandler = require("./controllers/errorController");
+const { getSecrets } = require("./utils/getAWSSecrets");
 
 const app = express();
 const PORT = process.env.PORT || 8003;
@@ -19,8 +21,10 @@ process.on("unhandledRejection", (err) => {
 });
 
 // CONNECT TO MONGODB DATABASE
-const MONGO_STRING = process.env.MONGO_URI.replace("<username>", process.env.MONGO_USERNAME).replace("<password>", process.env.MONGO_PASSWORD);
-mongoose.connect(MONGO_STRING);
+getSecrets().then((secrets) => {
+    const MONGO_STRING = secrets.MONGO_URI.replace("<username>", secrets.MONGO_USERNAME).replace("<password>", secrets.MONGO_PASSWORD);
+    mongoose.connect(MONGO_STRING);
+});
 
 const database = mongoose.connection;
 
@@ -43,6 +47,7 @@ app.use(
 );
 
 app.use("/api/v1/user", userRouter);
+app.use("/api/v1/blog", blogRouter);
 
 app.get("/*", (req, res, next) => {
     res.status(404).send("Page Not Found");
