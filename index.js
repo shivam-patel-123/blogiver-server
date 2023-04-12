@@ -51,7 +51,7 @@ app.use(cookieParser());
 
 app.use((req, res, next) => {
     console.log("INSIDE CORS");
-    res.header("Access-Control-Allow-Origin", "192.168.0.0/24");
+    res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
     res.header("Access-Control-Allow-Credentials", "true");
     if (req.method === "OPTIONS") {
