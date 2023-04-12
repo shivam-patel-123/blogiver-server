@@ -57,10 +57,10 @@ exports.createNewBlog = catchAsync(async (req, res, next) => {
 
     await blog.save();
 
-    const apiGatewayURL = process.env.API_GATEWAY_URL || "https://4ir8e2deb9.execute-api.us-east-1.amazonaws.com/Development";
+    const apiGatewayURL = process.env.API_GATEWAY_URL || "https://4ir8e2deb9.execute-api.us-east-1.amazonaws.com/Development/";
     console.log(apiGatewayURL);
 
-    const sendEmail = await axios.post(`${apiGatewayURL}/send-email`, {
+    const sendEmail = await axios.post(`${apiGatewayURL}send-email`, {
         to: user.email,
         subject: `${blogTitle} - Blogiver`,
         message: `You have just created a new blog on Blogiver. \nBlog Title: ${blog.blogTitle}.\n Blog Abstract: ${blog.blogAbstract}. \nCategory: ${blog.category}`,
