@@ -10,7 +10,8 @@ const { getSecrets } = require("../utils/getAWSSecrets");
 exports.sendCookie = (key, value, options, res) => {
     if (!options.maxAge) {
         getSecrets().then((secrets) => {
-            options.maxAge = secrets.JWT_TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000;
+            console.log(secrets);
+            options.maxAge = process.env.JWT_TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000;
         });
     }
     res.cookie(key, value, options);
@@ -18,9 +19,10 @@ exports.sendCookie = (key, value, options, res) => {
 
 exports.createAndSendToken = async (data, res) => {
     const secrets = await getSecrets();
+    console.log(secrets);
 
     const token = jwt.sign(data, secrets.JWT_TOKEN_SECRET, {
-        expiresIn: secrets.JWT_TOKEN_EXPIRY,
+        expiresIn: process.env.JWT_TOKEN_EXPIRY,
     });
 
     this.sendCookie(
