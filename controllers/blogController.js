@@ -58,6 +58,7 @@ exports.createNewBlog = catchAsync(async (req, res, next) => {
     await blog.save();
 
     const apiGatewayURL = process.env.API_GATEWAY_URL || "https://4ir8e2deb9.execute-api.us-east-1.amazonaws.com/Development";
+    console.log(apiGatewayURL);
 
     const sendEmail = await axios.post(`${apiGatewayURL}/send-email`, {
         to: user.email,
@@ -83,6 +84,8 @@ exports.getAllBlogs = catchAsync(async (req, res, next) => {
     } else {
         blogs = await Blog.find({ category });
     }
+
+    console.log(blogs);
 
     res.status(200).json({
         status: "success",
