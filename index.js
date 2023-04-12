@@ -1,5 +1,5 @@
 const express = require("express");
-const cors = require("cors");
+// const cors = require("cors");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
 require("dotenv").config();
@@ -39,13 +39,24 @@ database.once("connected", () => {
 app.use(express.static("public"));
 app.use(express.json());
 app.use(cookieParser());
-app.use(
-    cors({
-        origin: "*",
-        credentials: true,
-        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-    })
-);
+// app.use(
+//     cors({
+//         origin: "*",
+//         credentials: true,
+//         methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+//     })
+// );
+
+app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+    res.header("Access-Control-Allow-Credentials", "true");
+    if (req.method === "OPTIONS") {
+        res.header("Access-Control-Allow-Methods", "PUT, POST, PATCH, DELETE, GET");
+        return res.status(200).json({});
+    }
+    next();
+});
 
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/blog", blogRouter);
